@@ -16,14 +16,17 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
           python3 << 'PYEOF'
-          import json, subprocess, os
-          from datetime import date
+          import json, subprocess, os, re
+          from datetime import date, timedelta, timezone
 
-          start = date(2026, 5, 25)
-          today = date.today()
-          day_num = (today - start).days + 1
+          KST = timezone(timedelta(hours=9))
+          start = date(2026, 5, 26)
+          today_kst = date.today()  # UTC 22:00 실행 = KST 다음날 07:00
+          # cron은 UTC 22:00에 실행되므로 KST 기준 다음날
+          today_kst = today_kst + timedelta(days=1)
+          day_num = (today_kst - start).days + 1
           week_num = (day_num - 1) // 7 + 1
-          dow = today.isoweekday()
+          dow = today_kst.isoweekday()
 
           webhook = os.environ["SLACK_WEBHOOK_URL"]
 
@@ -44,14 +47,11 @@ jobs:
               content = f.read()
 
           # Day 섹션 추출
-          import re
-          # 단일 Day (### Day 1 ...)
-          pattern = rf"### Day {day_num} .*?\n(.*?)(?=### Day |\n---|\Z)"
-          match = re.search(pattern, content, re.DOTALL)
-          # 범위형 Day (### Day 50~51 ...)
+          pattern = rf"^### Day {day_num} .*?\n(.*?)(?=^### Day |\n---\n|\Z)"
+          match = re.search(pattern, content, re.DOTALL | re.MULTILINE)
           if not match:
-              pattern = rf"### Day.*?{day_num}.*?\n(.*?)(?=### Day |\n---|\Z)"
-              match = re.search(pattern, content, re.DOTALL)
+              pattern = rf"^### Day.*?{day_num}.*?\n(.*?)(?=^### Day |\n---\n|\Z)"
+              match = re.search(pattern, content, re.DOTALL | re.MULTILINE)
 
           if not match:
               msg = f"⚠️ Day {day_num} 섹션을 찾을 수 없습니다."
@@ -60,30 +60,39 @@ jobs:
               exit(0)
 
           # 제목 추출
-          title_match = re.search(rf"### (Day.*?{day_num}.*)", content)
+          title_match = re.search(rf"^### (Day {day_num} .+)$", content, re.MULTILINE)
+          if not title_match:
+              title_match = re.search(rf"^### (Day.*?{day_num}.+)$", content, re.MULTILINE)
           title = title_match.group(1) if title_match else f"Day {day_num}"
 
           section = match.group(1)
 
-          # 할 일 추출
-          todos = re.findall(r"^- \[ \] (.+)$", section, re.MULTILINE)[:8]
-          todos_text = "\n".join(f"☐ {t}" for t in todos)
+          # 할 일 추출: - [ ] 체크박스 또는 일반 - 목록 (하위 들여쓰기 제외)
+          todos = re.findall(r"^- \[ \] (.+)$", section, re.MULTILINE)
+          if not todos:
+              todos = [m for m in re.findall(r"^- (?!\s)(.+)$", section, re.MULTILINE)
+                       if not m.startswith("**") and not m.startswith("오후") and not m.startswith("블로그")]
+          todos = todos[:8]
+          todos_text = "\n".join(f"• {t}" for t in todos)
 
-          # 왜 질문 추출
-          whys = re.findall(r"\*\*왜 질문:\*\*\s*(.+?)(?:\n|$)", section)[:2]
+          # 왜 질문 추출: **왜 질문:** 패턴 또는 일반적인 질문 패턴
+          whys = re.findall(r"\*\*왜 질문:\*\*\s*(.+?)(?:\n|$)", section)
+          if not whys:
+              whys = [m.strip() for m in re.findall(r"^\s+- (.+\?)\s*$", section, re.MULTILINE)
+                      if "왜" in m or "어디" in m or "무슨" in m or "어떻게" in m]
+          whys = whys[:3]
           why_text = "\n".join(f"❓ {w}" for w in whys)
 
-          msg = f"""*📚 {title}*
-          ⏰ {time_info} | Week {week_num}
+          # 메시지 조립
+          parts = [f"*📚 {title}*", f"⏰ {time_info} | Week {week_num}"]
 
-          *할 일:*
-          {todos_text}
+          if todos_text:
+              parts.append(f"\n*할 일:*\n{todos_text}")
 
-          *오늘의 핵심 질문:*
-          {why_text}"""
+          if why_text:
+              parts.append(f"\n*오늘의 핵심 질문:*\n{why_text}")
 
-          # 들여쓰기 제거
-          msg = "\n".join(line.strip() for line in msg.split("\n"))
+          msg = "\n".join(parts)
 
           subprocess.run(["curl", "-s", "-X", "POST", "-H", "Content-type: application/json",
               "--data", json.dumps({"text": msg}), webhook])
