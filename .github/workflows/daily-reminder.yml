@@ -11,69 +11,80 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Calculate day and send Slack message
+      - name: Send Slack reminder
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         run: |
-          START_DATE="2026-05-25"
-          TODAY=$(date +%Y-%m-%d)
-          DAY_NUM=$(( ( $(date -d "$TODAY" +%s) - $(date -d "$START_DATE" +%s) ) / 86400 + 1 ))
-          WEEK_NUM=$(( (DAY_NUM - 1) / 7 + 1 ))
-          DOW=$(date +%u)
+          python3 << 'PYEOF'
+          import json, subprocess, os
+          from datetime import date
 
-          if [ "$DAY_NUM" -gt 56 ] || [ "$DAY_NUM" -lt 1 ]; then
-            curl -s -X POST -H 'Content-type: application/json' \
-              --data '{"text": "🎉 1단계 커리큘럼 완료! 수고했습니다."}' \
-              "$SLACK_WEBHOOK_URL"
-            exit 0
-          fi
+          start = date(2026, 5, 25)
+          today = date.today()
+          day_num = (today - start).days + 1
+          week_num = (day_num - 1) // 7 + 1
+          dow = today.isoweekday()
 
-          case $DOW in
-            6) TIME_INFO="토요일 — 5~6h (오전 3h + 오후 2~3h)" ;;
-            7) TIME_INFO="일요일 — 2~3h (오전만, 오후 휴식)" ;;
-            *) TIME_INFO="평일 — 2~3h (20:00~22:30)" ;;
-          esac
+          webhook = os.environ["SLACK_WEBHOOK_URL"]
+
+          if day_num > 56 or day_num < 1:
+              msg = "🎉 1단계 커리큘럼 완료! 수고했습니다."
+              subprocess.run(["curl", "-s", "-X", "POST", "-H", "Content-type: application/json",
+                  "--data", json.dumps({"text": msg}), webhook])
+              exit(0)
+
+          if dow == 6:
+              time_info = "토요일 — 5~6h (오전 3h + 오후 2~3h)"
+          elif dow == 7:
+              time_info = "일요일 — 2~3h (오전만, 오후 휴식)"
+          else:
+              time_info = "평일 — 2~3h (20:00~22:30)"
+
+          with open("LEARNING_STAGE1.md", "r") as f:
+              content = f.read()
 
           # Day 섹션 추출
-          SECTION=$(sed -n "/^### Day $DAY_NUM /,/^### Day /p" LEARNING_STAGE1.md | sed '$ d')
-          if [ -z "$SECTION" ]; then
-            SECTION=$(sed -n "/^### Day $DAY_NUM /,/^---$/p" LEARNING_STAGE1.md)
-          fi
-          # Day 50~51 같은 범위형 처리
-          if [ -z "$SECTION" ]; then
-            SECTION=$(sed -n "/^### Day.*${DAY_NUM}/,/^### Day /p" LEARNING_STAGE1.md | sed '$ d')
-          fi
+          import re
+          # 단일 Day (### Day 1 ...)
+          pattern = rf"### Day {day_num} .*?\n(.*?)(?=### Day |\n---|\Z)"
+          match = re.search(pattern, content, re.DOTALL)
+          # 범위형 Day (### Day 50~51 ...)
+          if not match:
+              pattern = rf"### Day.*?{day_num}.*?\n(.*?)(?=### Day |\n---|\Z)"
+              match = re.search(pattern, content, re.DOTALL)
 
-          TITLE=$(echo "$SECTION" | head -1 | sed 's/^### //')
+          if not match:
+              msg = f"⚠️ Day {day_num} 섹션을 찾을 수 없습니다."
+              subprocess.run(["curl", "-s", "-X", "POST", "-H", "Content-type: application/json",
+                  "--data", json.dumps({"text": msg}), webhook])
+              exit(0)
+
+          # 제목 추출
+          title_match = re.search(rf"### (Day.*?{day_num}.*)", content)
+          title = title_match.group(1) if title_match else f"Day {day_num}"
+
+          section = match.group(1)
 
           # 할 일 추출
-          TODOS=$(echo "$SECTION" | grep -E "^- \[ \]" | head -8 | sed 's/- \[ \] /☐ /')
+          todos = re.findall(r"^- \[ \] (.+)$", section, re.MULTILINE)[:8]
+          todos_text = "\n".join(f"☐ {t}" for t in todos)
 
           # 왜 질문 추출
-          WHY=$(echo "$SECTION" | grep -oP '(?<=\*\*왜 질문:\*\* ).*' | head -2 | sed 's/^/❓ /')
-          if [ -z "$WHY" ]; then
-            WHY=$(echo "$SECTION" | grep -oP '(?<=\*\*왜 질문:\*\*\s).*' | head -2 | sed 's/^/❓ /')
-          fi
+          whys = re.findall(r"\*\*왜 질문:\*\*\s*(.+?)(?:\n|$)", section)[:2]
+          why_text = "\n".join(f"❓ {w}" for w in whys)
 
-          # Slack 메시지 조립
-          read -r -d '' MSG << MSGEOF
-          *📚 ${TITLE}*
-          ⏰ ${TIME_INFO} | Week ${WEEK_NUM}
+          msg = f"""*📚 {title}*
+          ⏰ {time_info} | Week {week_num}
 
           *할 일:*
-          ${TODOS}
+          {todos_text}
 
           *오늘의 핵심 질문:*
-          ${WHY}
-          MSGEOF
+          {why_text}"""
 
-          # JSON 이스케이프 후 전송
-          PAYLOAD=$(echo "$MSG" | python3 -c "
-          import sys, json
-          text = sys.stdin.read().strip()
-          print(json.dumps({'text': text}))
-          ")
+          # 들여쓰기 제거
+          msg = "\n".join(line.strip() for line in msg.split("\n"))
 
-          curl -s -X POST -H 'Content-type: application/json' \
-            --data "$PAYLOAD" \
-            "$SLACK_WEBHOOK_URL"
+          subprocess.run(["curl", "-s", "-X", "POST", "-H", "Content-type: application/json",
+              "--data", json.dumps({"text": msg}), webhook])
+          PYEOF
