@@ -1,0 +1,79 @@
+name: Daily Learning Reminder
+
+on:
+  schedule:
+    - cron: '0 22 * * *'  # 매일 KST 오전 7시 (UTC 22:00)
+  workflow_dispatch: # 수동 실행 가능
+
+jobs:
+  send-reminder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Calculate day and send Slack message
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          START_DATE="2026-05-25"
+          TODAY=$(date +%Y-%m-%d)
+          DAY_NUM=$(( ( $(date -d "$TODAY" +%s) - $(date -d "$START_DATE" +%s) ) / 86400 + 1 ))
+          WEEK_NUM=$(( (DAY_NUM - 1) / 7 + 1 ))
+          DOW=$(date +%u)
+
+          if [ "$DAY_NUM" -gt 56 ] || [ "$DAY_NUM" -lt 1 ]; then
+            curl -s -X POST -H 'Content-type: application/json' \
+              --data '{"text": "🎉 1단계 커리큘럼 완료! 수고했습니다."}' \
+              "$SLACK_WEBHOOK_URL"
+            exit 0
+          fi
+
+          case $DOW in
+            6) TIME_INFO="토요일 — 5~6h (오전 3h + 오후 2~3h)" ;;
+            7) TIME_INFO="일요일 — 2~3h (오전만, 오후 휴식)" ;;
+            *) TIME_INFO="평일 — 2~3h (20:00~22:30)" ;;
+          esac
+
+          # Day 섹션 추출
+          SECTION=$(sed -n "/^### Day $DAY_NUM /,/^### Day /p" LEARNING_STAGE1.md | sed '$ d')
+          if [ -z "$SECTION" ]; then
+            SECTION=$(sed -n "/^### Day $DAY_NUM /,/^---$/p" LEARNING_STAGE1.md)
+          fi
+          # Day 50~51 같은 범위형 처리
+          if [ -z "$SECTION" ]; then
+            SECTION=$(sed -n "/^### Day.*${DAY_NUM}/,/^### Day /p" LEARNING_STAGE1.md | sed '$ d')
+          fi
+
+          TITLE=$(echo "$SECTION" | head -1 | sed 's/^### //')
+
+          # 할 일 추출
+          TODOS=$(echo "$SECTION" | grep -E "^- \[ \]" | head -8 | sed 's/- \[ \] /☐ /')
+
+          # 왜 질문 추출
+          WHY=$(echo "$SECTION" | grep -oP '(?<=\*\*왜 질문:\*\* ).*' | head -2 | sed 's/^/❓ /')
+          if [ -z "$WHY" ]; then
+            WHY=$(echo "$SECTION" | grep -oP '(?<=\*\*왜 질문:\*\*\s).*' | head -2 | sed 's/^/❓ /')
+          fi
+
+          # Slack 메시지 조립
+          read -r -d '' MSG << MSGEOF
+          *📚 ${TITLE}*
+          ⏰ ${TIME_INFO} | Week ${WEEK_NUM}
+
+          *할 일:*
+          ${TODOS}
+
+          *오늘의 핵심 질문:*
+          ${WHY}
+          MSGEOF
+
+          # JSON 이스케이프 후 전송
+          PAYLOAD=$(echo "$MSG" | python3 -c "
+          import sys, json
+          text = sys.stdin.read().strip()
+          print(json.dumps({'text': text}))
+          ")
+
+          curl -s -X POST -H 'Content-type: application/json' \
+            --data "$PAYLOAD" \
+            "$SLACK_WEBHOOK_URL"
