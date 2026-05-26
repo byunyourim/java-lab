@@ -46,9 +46,43 @@ error message: Java heap space
    - 28.12   0.00  99.27  66.92  16.38    1   0.001   0  0.000   2  0.000  0.001
 ```
 
-- **O (Old Gen)**: 13% → 99%까지 꾸준히 증가
-- **S0/S1 (Survivor)**: `-`로 표시 — G1에서는 Survivor를 동적 관리하므로 대부분 비어 있음
-- **YGC=1, FGC=0**: Young GC 1회만 발생하고 Old로 직행 (1MB 청크가 Humongous Object이기 때문)
+#### 컬럼 설명 — 메모리 사용률 (%)
+
+| 컬럼 | 의미 | 이 결과에서 |
+|------|------|------------|
+| **S0** | Survivor 0 사용률 | `-` (G1에서는 동적 관리라 비어있음) |
+| **S1** | Survivor 1 사용률 | 28.12% (YGC 이후 살아남은 객체) |
+| **E** | Eden 사용률 | 0.00% (1MB 청크가 Humongous라 Eden 안 거침) |
+| **O** | **Old Gen 사용률** | **13% → 99%** 이게 핵심 |
+| **M** | Metaspace 사용률 | 66% (클래스 메타데이터, 변동 없음) |
+| **CCS** | Compressed Class Space | 16% (고정) |
+
+#### 컬럼 설명 — GC 횟수와 소요 시간
+
+| 컬럼 | 의미 | 이 결과에서 |
+|------|------|------------|
+| **YGC** | Young GC 횟수 | 1회 |
+| **YGCT** | Young GC 누적 시간(초) | 0.001s |
+| **FGC** | Full GC 횟수 | 0회 (jstat이 캡처하기 전에 끝남) |
+| **FGCT** | Full GC 누적 시간(초) | 0.000s |
+| **CGC** | Concurrent GC 횟수 | 2회 |
+| **CGCT** | Concurrent GC 누적 시간(초) | 0.000s |
+| **GCT** | GC 총 시간 | 0.001s |
+
+#### 시간순으로 읽기
+
+```
+O: 13% → 26% → 38% → 50% → 63%    ← 1초마다 ~12%씩 증가 (1MB씩 할당)
+                                      YGC=0, Eden=0% → Old에 직접 쌓이는 중
+
+O: 63% → 63%  (YGC 0→1, CGC 0→2)   ← Young GC 1회 + Concurrent GC 2회 발생
+                                      Old가 잠깐 줄었다가 다시 채워짐
+
+O: 73% → 83% → 93% → 99%           ← GC 해도 회수할 게 없어서 계속 증가
+                                      이 직후 Full GC 반복 → OOM
+```
+
+**핵심**: Eden이 계속 0%인 게 중요. 1MB `byte[]`가 G1 Region(1MB)의 50% 이상이라 **Humongous Object**로 Eden을 건너뛰고 Old에 바로 들어갔다는 증거. 그래서 Young GC가 거의 무의미했고, Old만 차올라서 OOM이 터진 것.
 
 ### GC 로그 분석 (`-Xlog:gc*`)
 
