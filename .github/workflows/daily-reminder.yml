@@ -17,7 +17,7 @@ jobs:
         run: |
           python3 << 'PYEOF'
           import json, subprocess, os, re
-          from datetime import date, timedelta, timezone
+          from datetime import date, timedelta
 
           start = date(2026, 5, 26)
           today_kst = date.today() + timedelta(days=1)  # UTC 22:00 = KST 다음날 07:00
@@ -27,8 +27,26 @@ jobs:
 
           webhook = os.environ["SLACK_WEBHOOK_URL"]
 
-          if day_num > 56 or day_num < 1:
-              msg = "🎉 1단계 커리큘럼 완료! 수고했습니다."
+          # Day 번호 → 파일 + 단계 매핑
+          STAGES = [
+              (1,   56,  "LEARNING_STAGE1.md", "1단계: Java/Spring + JPA"),
+              (57,  84,  "LEARNING_STAGE2.md", "2단계: DB & SQL"),
+              (85,  112, "LEARNING_STAGE3.md", "3단계: 네트워크 & HTTP"),
+              (113, 147, "LEARNING_STAGE4.md", "4단계: 인프라 & 컨테이너"),
+              (148, 175, "LEARNING_STAGE5.md", "5단계: CI/CD & DevOps"),
+              (176, 231, "LEARNING_STAGE6.md", "6단계: 아키텍처 & 분산 시스템"),
+          ]
+
+          stage_file = None
+          stage_name = None
+          for s_start, s_end, s_file, s_name in STAGES:
+              if s_start <= day_num <= s_end:
+                  stage_file = s_file
+                  stage_name = s_name
+                  break
+
+          if day_num < 1 or stage_file is None:
+              msg = "🎉 전체 커리큘럼 완료! 수고했습니다. 💪"
               subprocess.run(["curl", "-s", "-X", "POST", "-H", "Content-type: application/json",
                   "--data", json.dumps({"text": msg}), webhook])
               exit(0)
@@ -40,26 +58,21 @@ jobs:
           else:
               time_info = "평일 — 2~3h (20:00~22:30)"
 
-          with open("LEARNING_STAGE1.md", "r") as f:
+          with open(stage_file, "r") as f:
               content = f.read()
 
-          # Day 섹션 전체 추출
-          pattern = rf"^### Day {day_num} .*?\n(.*?)(?=^### Day |\n---\n|\Z)"
+          # Day 섹션 전체 추출 (## Day 또는 ### Day 둘 다 지원)
+          pattern = rf"^#{{2,3}} Day {day_num} .*?\n(.*?)(?=^#{{2,3}} Day |\n---\n|\Z)"
           match = re.search(pattern, content, re.DOTALL | re.MULTILINE)
-          if not match:
-              pattern = rf"^### Day.*?{day_num}.*?\n(.*?)(?=^### Day |\n---\n|\Z)"
-              match = re.search(pattern, content, re.DOTALL | re.MULTILINE)
 
           if not match:
-              msg = f"⚠️ Day {day_num} 섹션을 찾을 수 없습니다."
+              msg = f"⚠️ Day {day_num} 섹션을 {stage_file}에서 찾을 수 없습니다."
               subprocess.run(["curl", "-s", "-X", "POST", "-H", "Content-type: application/json",
                   "--data", json.dumps({"text": msg}), webhook])
               exit(0)
 
           # 제목 추출
-          title_match = re.search(rf"^### (Day {day_num} .+)$", content, re.MULTILINE)
-          if not title_match:
-              title_match = re.search(rf"^### (Day.*?{day_num}.+)$", content, re.MULTILINE)
+          title_match = re.search(rf"^#{{2,3}} (Day {day_num} .+)$", content, re.MULTILINE)
           title = title_match.group(1) if title_match else f"Day {day_num}"
 
           section = match.group(1).strip()
@@ -69,7 +82,7 @@ jobs:
           section = section.replace("- [ ] ", "☐ ")
           section = re.sub(r"`([^`]+)`", r"`\1`", section)
 
-          msg = f"*📚 {title}*\n⏰ {time_info} | Week {week_num}\n\n{section}"
+          msg = f"*📚 [{stage_name}] {title}*\n⏰ {time_info} | Week {week_num}\n\n{section}"
 
           # Slack 메시지 길이 제한 (40000자)
           if len(msg) > 39000:
