@@ -21,7 +21,7 @@
 
 ## Week 1 — JVM 메모리 & 동시성 + Gradle 기초
 
-### Day 1 (월) — JVM 메모리 구조 이해
+### Day 1 (5/25 월) — JVM 메모리 구조 이해
 
 **이해 (2h)**
 - JVM 아키텍처 전체 그림 그려보기 (종이에 직접)
@@ -42,7 +42,7 @@
 - "자바 성능 튜닝 이야기" 1~2장
 - Oracle 공식: "The Structure of the Java Virtual Machine"
 
-### Day 2 (화) — Heap OOM + Stack Overflow 재현
+### Day 2 (5/26 화) — Heap OOM + Stack Overflow 재현
 
 **코드 (2.5h) — java-lab**
 - [ ] Heap OOM 재현
@@ -55,7 +55,7 @@
   - **왜 질문:** 스택 프레임 하나의 크기는 뭐가 결정하는가? (지역변수 수, 파라미터 수)
 - [ ] 각 OOM 발생 시 에러 메시지 정확히 기록
 
-### Day 3 (수) — Metaspace OOM + GC 기초
+### Day 3 (5/27 수) — Metaspace OOM + GC 기초
 
 **코드 + 이해 (2.5h)**
 - [ ] Metaspace OOM 재현 (java-lab)
@@ -71,7 +71,7 @@
 
 **참고:** "자바 성능 튜닝 이야기" 3장
 
-### Day 4 (목) — G1 GC vs ZGC 깊이 파기
+### Day 4 (5/28 목) — G1 GC vs ZGC 깊이 파기
 
 **이해 + 코드 (2.5h)**
 - [ ] G1 GC 동작 원리
@@ -89,7 +89,7 @@
   - ZGC: `-XX:+UseZGC -XX:+ZGenerational -Xlog:gc*=info:file=zgc.log`
   - 같은 부하(byte[] 1만 개 생성+삭제 반복)로 두 로그 비교
 
-### Day 5 (금) — 동시성 기초: synchronized와 volatile
+### Day 5 (5/29 금) — 동시성 기초: synchronized와 volatile
 
 **이해 + 코드 (2.5h)**
 - [ ] Java Memory Model (JMM) 핵심 이해
@@ -105,7 +105,7 @@
   - synchronized로 수정 → 정확히 1000 나오는지 확인
   - volatile만 붙이면 race condition이 해결되는가? 안 되는가? **왜?**
 
-### Day 6 (토) — AtomicInteger, LongAdder, Virtual Thread 벤치마크
+### Day 6 (5/30 토) — AtomicInteger, LongAdder, Virtual Thread 벤치마크
 
 **코드 + 측정 (5h)**
 - [ ] Atomic 클래스 깊이 이해
@@ -125,7 +125,7 @@
   - **왜 질문:** `ReentrantLock`은 pinning이 안 생기는 이유는?
 - [ ] `jstat`, `jmap -histo` 결과 캡처
 
-### Day 7 (일) — Gradle 기초 + 정리
+### Day 7 (5/31 일) — Gradle 기초 + 정리
 
 **오전 (2.5h)**
 - [ ] Gradle 빌드 라이프사이클
@@ -145,7 +145,7 @@
 
 ## Week 2 — Spring IoC/AOP 내부 동작
 
-### Day 8 (월) — IoC 컨테이너가 하는 일
+### Day 8 (6/1 월) — IoC 컨테이너가 하는 일
 
 **이해 (2h)**
 - Spring IoC 컨테이너 전체 흐름 그려보기
@@ -162,7 +162,7 @@
 
 **참고:** 김영한 "스프링 핵심 원리 기본편" 섹션 1~3
 
-### Day 9 (화) — 빈 스코프와 라이프사이클
+### Day 9 (6/2 화) — 빈 스코프와 라이프사이클
 
 **이해 + 코드 (2.5h)**
 - [ ] 빈 스코프 5가지 이해
@@ -179,7 +179,7 @@
   - **왜 질문:** 세터 주입에서는 왜 가능했는가? (3단계 캐시 — singletonFactories)
   - Spring Boot 2.6+에서 기본적으로 순환참조를 금지한 이유는?
 
-### Day 10 (수) — 미니 IoC 컨테이너 직접 구현
+### Day 10 (6/3 수) — 미니 IoC 컨테이너 직접 구현
 
 **코드 (2.5h) — java-lab**
 - [ ] 직접 만드는 IoC 컨테이너 (100~150줄)
@@ -194,7 +194,7 @@
   - **왜 질문:** 생성 순서를 어떻게 결정하지? → 의존성 그래프 + 위상 정렬
   - Spring은 이걸 어떻게 해결하는가? → `DefaultListableBeanFactory` 다시 보기
 
-### Day 11 (목) — AOP 내부 동작 원리
+### Day 11 (6/4 목) — AOP 내부 동작 원리
 
 **이해 + 코드 (2.5h)**
 - [ ] AOP 프록시 원리 이해
@@ -210,7 +210,7 @@
   - **왜 질문:** Filter는 Servlet 스펙, Interceptor는 Spring MVC, AOP는 Spring Core. 왜 3개나?
   - 언제 뭘 써야 하는가? (인증: Filter, 로깅: AOP, 권한: Interceptor or AOP)
 
-### Day 12 (금) — @TradeLog AOP 구현
+### Day 12 (6/5 금) — @TradeLog AOP 구현
 
 **코드 (2.5h) — trader-bot**
 - [ ] `@TradeLog` 커스텀 어노테이션 작성
@@ -222,7 +222,7 @@
 - [ ] AOP 적용 전/후 메서드 호출 비용 측정
   - **왜 질문:** AOP 프록시가 성능에 미치는 영향은 실제로 얼마나 되나?
 
-### Day 13 (토) — Auto Configuration + MDC traceId
+### Day 13 (6/6 토) — Auto Configuration + MDC traceId
 
 **이해 + 코드 (5h)**
 
@@ -244,7 +244,7 @@
 - [ ] logback 패턴에 `%X{traceId}` 추가
 - [ ] 에러 응답에 traceId 포함 → 로그 추적 시연
 
-### Day 14 (일) — Week 2 정리 + 블로그
+### Day 14 (6/7 일) — Week 2 정리 + 블로그
 
 **오전 (2.5h)**
 - [ ] 미니 IoC vs Spring 차이점 표로 정리
@@ -259,7 +259,7 @@
 
 ## Week 3 — 예외 처리 전략 + Bean Validation
 
-### Day 15 (월) — 자바 예외 체계 깊이 이해
+### Day 15 (6/8 월) — 자바 예외 체계 깊이 이해
 
 **이해 (2h)**
 - Throwable 계층 구조 그려보기
@@ -273,7 +273,7 @@
 - **왜 질문:** try-with-resources가 왜 필요한가? `finally` 블록의 문제점은?
 - "이펙티브 자바" Item 69~77 핵심만 메모
 
-### Day 16 (화) — 도메인 예외 계층 설계
+### Day 16 (6/9 화) — 도메인 예외 계층 설계
 
 **코드 (2.5h) — trader-bot**
 - [ ] 예외 계층 설계 (기존 `ApplicationException` 기반 확장)
@@ -292,7 +292,7 @@
   - **왜 질문:** 예외 메시지에 사용자 입력값을 그대로 넣으면 왜 위험한가? (로그 인젝션, 민감정보 노출)
 - [ ] 기존 코드에서 예외를 `throw`하는 곳 찾아서 새 계층으로 교체
 
-### Day 17 (수) — @RestControllerAdvice 깊이 파기
+### Day 17 (6/10 수) — @RestControllerAdvice 깊이 파기
 
 **이해 + 코드 (2.5h)**
 - [ ] `@ControllerAdvice` 동작 원리
@@ -306,7 +306,7 @@
   - 모든 에러 응답에 `traceId` 포함
 - [ ] 컨트롤러에서 try-catch 전부 제거 → 예외는 throw만
 
-### Day 18 (목) — Bean Validation 깊이 이해
+### Day 18 (6/11 목) — Bean Validation 깊이 이해
 
 **이해 + 코드 (2.5h)**
 - [ ] Bean Validation 동작 원리
@@ -323,7 +323,7 @@
   - `ConstraintValidator` 인터페이스 구현
   - **왜 질문:** 커스텀 Validator가 빈으로 등록되어야 하는 이유는? (DI 받기 위해)
 
-### Day 19 (금) — 에러 로깅 전략 + Logback 설정
+### Day 19 (6/12 금) — 에러 로깅 전략 + Logback 설정
 
 **이해 + 코드 (2.5h)**
 - [ ] 로깅 프레임워크 구조
@@ -341,7 +341,7 @@
   - 파일 롤링 정책 (일별, 30일 보관)
 - [ ] 민감정보 마스킹 확인 — 계좌번호, API 키 로그 출력 안 되는지
 
-### Day 20 (토) — 테스트로 예외 처리 검증 + 측정
+### Day 20 (6/13 토) — 테스트로 예외 처리 검증 + 측정
 
 **코드 + 측정 (5h)**
 
@@ -360,7 +360,7 @@
 - [ ] `--debug` Auto Config Report에서 Validation 관련 자동 설정 확인
 - [ ] Week 3 학습 노트 정리
 
-### Day 21 (일) — 블로그 + 다음 주 예습
+### Day 21 (6/14 일) — 블로그 + 다음 주 예습
 
 **오전 (2.5h)**
 - [ ] **블로그 작성:** "Spring Boot 예외 처리, 제대로 설계하기 — @ControllerAdvice부터 MDC까지"
@@ -374,7 +374,7 @@
 
 ## Week 4 — Spring Security + 종합
 
-### Day 22 (월) — Spring Security 아키텍처 이해
+### Day 22 (6/15 월) — Spring Security 아키텍처 이해
 
 **이해 (2h)**
 - Spring Security 전체 흐름 그려보기
@@ -392,7 +392,7 @@
 
 **참고:** 인프런 정수원 "스프링 시큐리티" 또는 공식 문서 Architecture 섹션
 
-### Day 23 (화) — JWT 발급 구현
+### Day 23 (6/16 화) — JWT 발급 구현
 
 **코드 (2.5h) — trader-bot**
 - [ ] 의존성 추가: `jjwt-api`, `jjwt-impl`, `jjwt-jackson`
@@ -408,7 +408,7 @@
   - 서명 키는 환경변수로 (`JWT_SECRET`)
 - [ ] Refresh Token Redis 저장 (`jwt:refresh:{userId}`)
 
-### Day 24 (수) — JWT 검증 필터 + SecurityFilterChain
+### Day 24 (6/17 수) — JWT 검증 필터 + SecurityFilterChain
 
 **코드 (2.5h) — trader-bot**
 - [ ] `JwtAuthenticationFilter extends OncePerRequestFilter` 구현
@@ -423,7 +423,7 @@
   - URL별 권한: `/api/auth/**` → permitAll, 나머지 → authenticated
   - `JwtAuthenticationFilter`를 `UsernamePasswordAuthenticationFilter` 앞에 등록
 
-### Day 25 (목) — 로그인/회원가입 API + Refresh
+### Day 25 (6/18 목) — 로그인/회원가입 API + Refresh
 
 **코드 (2.5h) — trader-bot**
 - [ ] 회원가입 API
@@ -440,7 +440,7 @@
   - Redis에서 Refresh Token 삭제
   - (선택) Access Token 블랙리스트
 
-### Day 26 (금) — @PreAuthorize + 권한 체계
+### Day 26 (6/19 금) — @PreAuthorize + 권한 체계
 
 **코드 (2.5h) — trader-bot**
 - [ ] 역할(Role) 기반 권한
@@ -455,7 +455,7 @@
   - `AuthenticationEntryPoint` — 401 커스텀 응답
   - `AccessDeniedHandler` — 403 커스텀 응답
 
-### Day 27 (토) — 종합 테스트 + 부하 측정
+### Day 27 (6/20 토) — 종합 테스트 + 부하 측정
 
 **코드 + 측정 (5h)**
 
@@ -481,7 +481,7 @@
   - 응답 시간 p50/p95/p99 기록
   - JWT 검증이 성능에 미치는 영향 측정
 
-### Day 28 (일) — M1 회고 + 블로그
+### Day 28 (6/21 일) — M1 회고 + 블로그
 
 **오전 (2.5h)**
 - [ ] **블로그 작성:** "Spring Boot 백엔드, 1단계 완성 — 4주 학습 회고"
@@ -501,7 +501,7 @@
 
 ## Week 5 — 영속성 컨텍스트 + 연관관계
 
-### Day 29 (월) — 영속성 컨텍스트 개념
+### Day 29 (6/22 월) — 영속성 컨텍스트 개념
 
 **이해 (2h)**
 - 영속성 컨텍스트란? — 엔티티를 관리하는 1차 캐시
@@ -519,7 +519,7 @@
 
 **참고:** "자바 ORM 표준 JPA 프로그래밍" 3장
 
-### Day 30 (화) — Dirty Checking + flush 실험
+### Day 30 (6/23 화) — Dirty Checking + flush 실험
 
 **코드 (2.5h) — trader-bot 또는 java-lab**
 - [ ] Dirty Checking 확인
@@ -536,7 +536,7 @@
   - `em.detach(entity)` 후 변경 → update 안 나가는 것 확인
   - `em.clear()` 후 같은 ID 조회 → SQL 다시 나가는 것 확인 (1차 캐시 초기화)
 
-### Day 31 (수) — merge vs persist + 1차 캐시
+### Day 31 (6/24 수) — merge vs persist + 1차 캐시
 
 **코드 (2.5h)**
 - [ ] `persist()` vs `merge()` 차이
@@ -550,7 +550,7 @@
   - **왜 질문:** 1차 캐시의 수명은? (트랜잭션 or EntityManager 범위)
   - **왜 질문:** OSIV(Open Session In View)가 뭔가? 왜 Spring Boot에서 기본 true인가? 왜 논란인가?
 
-### Day 32 (목) — 연관관계 매핑 기초
+### Day 32 (6/25 목) — 연관관계 매핑 기초
 
 **이해 + 코드 (2.5h)**
 - [ ] 연관관계 종류 이해
@@ -568,7 +568,7 @@
   - **단방향 @ManyToOne 위주로 설계** — 양방향은 진짜 필요할 때만
   - cascade, orphanRemoval 결정
 
-### Day 33 (금) — 지연 로딩 vs 즉시 로딩
+### Day 33 (6/26 금) — 지연 로딩 vs 즉시 로딩
 
 **이해 + 코드 (2.5h)**
 - [ ] FetchType.LAZY vs EAGER
@@ -583,7 +583,7 @@
 - [ ] 프록시 vs 실제 객체 `getClass()` 비교 → `$$HibernateProxy$$` 확인
   - **왜 질문:** `entity1.getClass() == entity2.getClass()`가 `false`일 수 있다. 왜? → `instanceof` 사용 권장
 
-### Day 34 (토) — N+1 문제 재현 + 4가지 해결법
+### Day 34 (6/27 토) — N+1 문제 재현 + 4가지 해결법
 
 **코드 + 측정 (5h)**
 
@@ -608,7 +608,7 @@
 - [ ] 각 방법별 SQL 발행 수 + 응답 시간 표로 정리
 - [ ] EXPLAIN ANALYZE로 실행 계획 비교
 
-### Day 35 (일) — 블로그 + Week 5 정리
+### Day 35 (6/28 일) — 블로그 + Week 5 정리
 
 **오전 (2.5h)**
 - [ ] **블로그 작성:** "N+1 문제 4가지 해법, SQL 로그로 직접 비교"
@@ -622,7 +622,7 @@
 
 ## Week 6 — QueryDSL + 트랜잭션 심화
 
-### Day 36 (월) — JPQL 깊이 이해
+### Day 36 (6/29 월) — JPQL 깊이 이해
 
 **이해 + 코드 (2.5h)**
 - [ ] JPQL vs SQL 차이
@@ -638,7 +638,7 @@
   - PostgreSQL 전용 기능 (JSONB, Window Function 등)
   - **왜 질문:** 네이티브 쿼리의 단점은? (DB 벤더 종속, 타입 안전성 없음)
 
-### Day 37 (화) — QueryDSL 설정 + 기본 쿼리
+### Day 37 (6/30 화) — QueryDSL 설정 + 기본 쿼리
 
 **코드 (2.5h) — trader-bot**
 - [ ] Gradle에 QueryDSL 설정
@@ -653,7 +653,7 @@
 - [ ] 거래 내역 기본 조회 쿼리 작성
   - 종목별, 날짜별 조회
 
-### Day 38 (수) — QueryDSL 동적 쿼리 + 페이지네이션
+### Day 38 (7/1 수) — QueryDSL 동적 쿼리 + 페이지네이션
 
 **코드 (2.5h) — trader-bot**
 - [ ] 동적 검색 쿼리
@@ -670,7 +670,7 @@
   - `Projections.constructor()` vs `@QueryProjection`
   - **왜 질문:** 엔티티 전체를 가져오지 않고 DTO로 가져오면 왜 성능이 좋은가?
 
-### Day 39 (목) — 트랜잭션 전파 속성 실험
+### Day 39 (7/2 목) — 트랜잭션 전파 속성 실험
 
 **이해 + 코드 (2.5h)**
 - [ ] `@Transactional` 프록시 동작 이해
@@ -686,7 +686,7 @@
   - **NOT_SUPPORTED**: 트랜잭션 없이 실행 (있으면 일시 중단)
 - [ ] 각 속성 동작을 로그로 확인 (`logging.level.org.springframework.transaction=TRACE`)
 
-### Day 40 (금) — 자기호출 함정 + readOnly
+### Day 40 (7/3 금) — 자기호출 함정 + readOnly
 
 **코드 (2.5h)**
 - [ ] **자기호출(self-invocation) 함정** 재현
@@ -706,7 +706,7 @@
   - PostgreSQL의 기본 격리 수준은? (Read Committed)
   - **왜 질문:** Repeatable Read에서 Phantom Read가 발생하는가? PostgreSQL에서는? (MVCC)
 
-### Day 41 (토) — 낙관적/비관적 락 + Auditing
+### Day 41 (7/4 토) — 낙관적/비관적 락 + Auditing
 
 **코드 + 측정 (5h)**
 
@@ -736,7 +736,7 @@
   - 낙관적 락 충돌 시나리오 테스트
   - Auditing 필드 자동 채워지는지 테스트
 
-### Day 42 (일) — 블로그 + Week 6 정리
+### Day 42 (7/5 일) — 블로그 + Week 6 정리
 
 **오전 (2.5h)**
 - [ ] **블로그 작성:** "트랜잭션 전파 + 자기호출 함정 — 코드로 재현하고 이해하기"
@@ -750,7 +750,7 @@
 
 ## Week 7 — 성능 최적화 + 내부 동작
 
-### Day 43 (월) — JPA 성능 문제 패턴 정리
+### Day 43 (7/6 월) — JPA 성능 문제 패턴 정리
 
 **이해 (2h)**
 - JPA에서 성능 문제가 생기는 대표적 원인 5가지
@@ -766,7 +766,7 @@
   - 트랜잭션 밖에서 LAZY 로딩 불가 → 서비스에서 필요한 데이터 미리 로딩
   - `spring.jpa.open-in-view=false` 설정 후 테스트
 
-### Day 44 (화) — 벌크 연산 + DTO 조회 최적화
+### Day 44 (7/7 화) — 벌크 연산 + DTO 조회 최적화
 
 **코드 (2.5h) — trader-bot**
 - [ ] 벌크 연산 최적화
@@ -782,7 +782,7 @@
   - `spring.jpa.properties.hibernate.default_batch_fetch_size=100`
   - 효과 측정 (SQL 수 비교)
 
-### Day 45 (수) — Hibernate 2차 캐시
+### Day 45 (7/8 수) — Hibernate 2차 캐시
 
 **이해 + 코드 (2.5h)**
 - [ ] 1차 캐시 vs 2차 캐시 차이
@@ -797,7 +797,7 @@
 - [ ] Spring Cache vs Hibernate 2차 캐시 차이
   - **왜 질문:** 둘 다 캐시인데 왜 다른가? (레이어가 다름 — 애플리케이션 vs ORM)
 
-### Day 46 (목) — Spring Data JPA 내부 동작
+### Day 46 (7/9 목) — Spring Data JPA 내부 동작
 
 **이해 + 코드 (2.5h)**
 - [ ] Spring Data JPA가 인터페이스에서 구현체를 만드는 원리
@@ -813,7 +813,7 @@
   - `TradeRepositoryCustom` + `TradeRepositoryCustomImpl`
   - **왜 질문:** 왜 이름 규칙을 지켜야 하는가? (`Impl` 접미사)
 
-### Day 47 (금) — OSIV + 커넥션 풀
+### Day 47 (7/10 금) — OSIV + 커넥션 풀
 
 **이해 + 코드 (2.5h)**
 - [ ] OSIV(Open Session In View) 깊이 이해
@@ -829,7 +829,7 @@
   - **왜 질문:** 풀 크기를 어떻게 결정하는가? (스레드 수 + 동시 쿼리 수)
   - HikariCP 메트릭 확인 (active, idle, waiting)
 
-### Day 48 (토) — 종합 PR + 부하 테스트
+### Day 48 (7/11 토) — 종합 PR + 부하 테스트
 
 **코드 + 측정 (5h)**
 
@@ -853,7 +853,7 @@
 - [ ] EXPLAIN ANALYZE로 주요 쿼리 실행 계획 확인
 - [ ] 성능 개선 전후 비교 표 작성
 
-### Day 49 (일) — M2 회고 + 블로그
+### Day 49 (7/12 일) — M2 회고 + 블로그
 
 **오전 (2.5h)**
 - [ ] **블로그 작성:** "JPA 4주 심화 — 내가 몰랐던 것들"
@@ -871,7 +871,7 @@
 
 ## Week 8 — 1단계 종합 정리 + 졸업 과제
 
-### Day 50~51 (월~화) — 종합 과제: "거래 주문 처리 API"
+### Day 50~51 (7/13~14 월~화) — 종합 과제: "거래 주문 처리 API"
 
 학습한 모든 것을 하나의 API에 통합:
 
@@ -885,28 +885,28 @@
 - [ ] QueryDSL 동적 검색 (거래 내역 필터)
 - [ ] JPA Auditing createdBy 자동 기록
 
-### Day 52~53 (수~목) — 테스트 + 문서화
+### Day 52~53 (7/15~16 수~목) — 테스트 + 문서화
 
 - [ ] 단위 테스트: 도메인 로직, 예외 케이스
 - [ ] 통합 테스트: `@SpringBootTest` + Testcontainers PostgreSQL
   - 성공 시나리오 + 실패 시나리오 (잔고 부족, 한도 초과, 토큰 만료, 동시 수정)
 - [ ] Swagger 문서 완성: `@Operation`, `@Schema`, JWT 인증 설정
 
-### Day 54 (금) — 부하 테스트 + 프로파일링
+### Day 54 (7/17 금) — 부하 테스트 + 프로파일링
 
 - [ ] k6로 100 RPS 부하 테스트
 - [ ] SQL 쿼리 수 최종 확인 (N+1 없음)
 - [ ] JVM 메모리/CPU 프로파일 (VisualVM 또는 IntelliJ Profiler)
 - [ ] 병목 지점 식별 + 가능하면 개선
 
-### Day 55 (토) — 셀프 코드 리뷰 + 리팩토링
+### Day 55 (7/18 토) — 셀프 코드 리뷰 + 리팩토링
 
 - [ ] 8주간 작성한 모든 PR 셀프 리뷰
 - [ ] 네이밍, 메서드 길이, 클래스 책임 점검
 - [ ] 테스트 커버리지 확인 (80% 이상)
 - [ ] 리팩토링 필요한 곳 정리 + 수정
 
-### Day 56 (일) — 1단계 졸업
+### Day 56 (7/19 일) — 1단계 졸업
 
 **오전 (2.5h)**
 - [ ] **블로그 작성:** "8주 학습 회고 — Java/Spring/JPA를 다시 배웠다"

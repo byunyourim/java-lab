@@ -20,6 +20,9 @@ dependencies {
     implementation 'org.openjdk.jmh:jmh-core:1.37'
     annotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
 
+    // ByteBuddy - 런타임 클래스 동적 생성
+    implementation 'net.bytebuddy:byte-buddy:1.15.11'
+
     // 테스트
     testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
