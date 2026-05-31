@@ -19,7 +19,7 @@ jobs:
           import json, subprocess, os, re
           from datetime import date, timedelta
 
-          start = date(2026, 5, 26)
+          start = date(2026, 6, 1)
           today_kst = date.today() + timedelta(days=1)  # UTC 22:00 = KST 다음날 07:00
           day_num = (today_kst - start).days + 1
           week_num = (day_num - 1) // 7 + 1
