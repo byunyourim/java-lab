@@ -17,10 +17,12 @@ jobs:
         run: |
           python3 << 'PYEOF'
           import json, subprocess, os, re
-          from datetime import date, timedelta
+          from datetime import date, datetime, timedelta, timezone
+
+          KST = timezone(timedelta(hours=9))
 
           start = date(2026, 6, 1)
-          today_kst = date.today() + timedelta(days=1)  # UTC 22:00 = KST 다음날 07:00
+          today_kst = datetime.now(KST).date()  # KST 기준 오늘 (Actions 지연에도 안전)
           day_num = (today_kst - start).days + 1
           week_num = (day_num - 1) // 7 + 1
           dow = today_kst.isoweekday()
